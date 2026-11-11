@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08060D">
+<title>Admin Dashboard | DIORS WEB</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#08060D;--side:#100B19;--card:#130E1C;--field:#0B0811;--item:#1B1226;
+  --border:#30203F;--border2:#392849;--purple:#A34DFF;--light:#C18AFF;--text:#F8F3FF;--muted:#A99AB8;--dim:#81738D;
+  --danger:#FF6B8B;--ok:#63E69A;--ease:cubic-bezier(.22,1,.36,1);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',system-ui,-apple-system,Arial,sans-serif}
+body{background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--light);outline-offset:2px}
+
+/* sidebar */
+.sidebar{width:250px;height:100vh;position:fixed;inset:0 auto 0 0;background:var(--side);border-right:1px solid var(--border);padding:25px 18px;z-index:30;display:flex;flex-direction:column;transition:transform .5s var(--ease)}
+.logo{font-size:23px;font-weight:900;color:var(--light);letter-spacing:2px;margin-bottom:30px}
+.logo span{color:#fff}
+.menu-title{color:#756783;font-size:11px;letter-spacing:2px;margin:22px 10px 12px}
+.nav-item{display:flex;align-items:center;gap:13px;width:100%;padding:14px;margin-bottom:7px;border-radius:10px;border:0;background:transparent;color:#B9AEC5;cursor:pointer;font-size:14px;text-align:left;position:relative;overflow:hidden;transition:color .3s,background .3s,transform .4s var(--ease)}
+.nav-item:hover{background:#1B1226;color:#fff;transform:translateX(4px)}
+.nav-item.active{background:linear-gradient(120deg,#59238B,#30134D);color:#fff;box-shadow:0 0 18px #8B35FF25;transform:none}
+.nav-item .badge{margin-left:auto;font-size:11px;background:#00000040;padding:2px 8px;border-radius:20px;color:#E0C8FF}
+.admin-info{margin-top:auto;padding:13px;background:var(--item);border-radius:12px;display:flex;align-items:center;gap:12px}
+.admin-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#A34DFF,#341052);display:grid;place-items:center;font-weight:700;flex:none;overflow:hidden}
+.admin-avatar img{width:100%;height:100%;object-fit:cover}
+.admin-info small{color:var(--muted)}
+.admin-info strong{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.backdrop{position:fixed;inset:0;background:#05030Ab0;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:20;opacity:0;visibility:hidden;transition:opacity .4s var(--ease),visibility .4s}
+.backdrop.show{opacity:1;visibility:visible}
+
+/* layout */
+.main{margin-left:250px;padding:30px;max-width:1100px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:30px}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar h2{font-size:24px}
+.topbar p{color:#93869F;font-size:13px;margin-top:6px}
+.mobile-menu{display:none;background:#21132F;border:1px solid #593478;border-radius:8px;padding:10px 13px;font-size:18px;cursor:pointer}
+.status{background:#1C3426;color:var(--ok);padding:9px 13px;border-radius:20px;font-size:11px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.status i{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:blink 2s ease-in-out infinite}
+@keyframes blink{50%{opacity:.3;transform:scale(.7)}}
+
+/* panels: fade + rise, staggered children */
+.panel{display:none}
+.panel.active{display:block}
+.panel.active>*{animation:rise .7s var(--ease) both}
+.panel.active>*:nth-child(2){animation-delay:.07s}
+.panel.active>*:nth-child(3){animation-delay:.14s}
+@keyframes rise{from{opacity:0;transform:translate3d(0,16px,0)}to{opacity:1;transform:none}}
+
+.welcome{background:linear-gradient(120deg,#28123D,#120C1C 75%);border:1px solid #542B72;border-radius:18px;padding:30px;margin-bottom:25px;position:relative;overflow:hidden}
+.welcome::after{content:"D";position:absolute;right:30px;top:-45px;font-size:190px;font-weight:800;color:#B15AFF;opacity:.08;pointer-events:none}
+.welcome h1{font-size:27px;margin-bottom:10px}
+.welcome p{color:#B9A9C9;font-size:13px;line-height:1.7}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:25px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:22px;transition:transform .5s var(--ease),border-color .4s,box-shadow .4s}
+.stat-card:hover{transform:translateY(-5px);border-color:#7A45A3;box-shadow:0 14px 32px #8B35FF1c}
+.stat-card .icon{font-size:23px;margin-bottom:17px;color:var(--light)}
+.stat-card h3{font-size:28px;margin-bottom:7px;font-variant-numeric:tabular-nums}
+.stat-card p{color:#9689A3;font-size:12px}
+.section-title{font-size:21px;margin-bottom:20px}
+.content-box{background:var(--card);border:1px solid var(--border);padding:23px;border-radius:15px;margin-bottom:20px}
+.content-box h3{margin-bottom:6px;font-size:16px}
+.hint{color:var(--dim);font-size:12px;line-height:1.8}
+
+/* forms */
+label{display:block;font-size:12px;color:#B8A9C6;margin:15px 0 8px}
+input,textarea{width:100%;background:var(--field);border:1px solid var(--border2);color:#fff;padding:14px;border-radius:9px;outline:none;font-size:13px;transition:border-color .3s,box-shadow .3s}
+input:focus,textarea:focus{border-color:var(--purple);box-shadow:0 0 0 3px #A34DFF22}
+textarea{resize:vertical;min-height:100px}
+.invalid{border-color:var(--danger)!important;animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.btn{background:linear-gradient(120deg,#A34DFF,#6424A0);color:#fff;border:0;border-radius:9px;padding:13px 19px;margin-top:17px;cursor:pointer;font-weight:700;font-size:13px;transition:transform .4s var(--ease),box-shadow .4s,opacity .3s}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px #9B4DFF40}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;border:1px solid #5A2B3A;color:var(--danger);padding:8px 13px;margin-top:0}
+.btn.ghost:hover{background:#FF6B8B14;box-shadow:none}
+
+/* list items: enter + exit */
+.list{margin-top:6px}
+.item{padding:15px;background:var(--item);border:1px solid var(--border2);border-radius:10px;margin-top:12px;display:flex;gap:14px;align-items:flex-start;justify-content:space-between;animation:rise .6s var(--ease) both;transition:opacity .35s var(--ease),transform .35s var(--ease)}
+.item.leaving{opacity:0;transform:translateX(24px) scale(.97)}
+.item-body{min-width:0;flex:1}
+.item-body strong{word-break:break-word}
+.item-body p{color:var(--muted);font-size:12px;margin-top:7px;line-height:1.7;word-break:break-word}
+.item img{width:100%;max-height:180px;object-fit:cover;border-radius:8px;display:block}
+.empty{color:var(--dim);font-size:13px;padding:15px 0}
+
+/* toast */
+#toasts{position:fixed;right:20px;bottom:20px;z-index:100;display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+.toast{background:#1E1230;border:1px solid #6D3B91;border-left:3px solid var(--ok);padding:13px 17px;border-radius:10px;font-size:13px;box-shadow:0 12px 32px #000a;animation:toastIn .5s var(--ease) both}
+.toast.error{border-left-color:var(--danger)}
+.toast.out{animation:toastOut .35s var(--ease) forwards}
+@keyframes toastIn{from{opacity:0;transform:translate3d(30px,0,0)}}
+@keyframes toastOut{to{opacity:0;transform:translate3d(30px,0,0)}}
+
+@media(max-width:850px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:none}
+  .main{margin-left:0;padding:20px 15px}
+  .mobile-menu{display:block}
+  .cards{grid-template-columns:1fr 1fr}
+}
+@media(max-width:450px){
+  .cards{grid-template-columns:1fr}
+  .welcome h1{font-size:22px}
+  .status{display:none}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+#login{position:fixed;inset:0;z-index:200;background:var(--bg);display:grid;place-items:center;padding:20px;transition:opacity .6s var(--ease),visibility .6s}
+#login.hide{opacity:0;visibility:hidden}
+.login-card{width:100%;max-width:380px;background:var(--card);border:1px solid #542B72;border-radius:18px;padding:32px;box-shadow:0 0 60px #9B4DFF1c;animation:rise .8s var(--ease) both}
+.login-card .logo{text-align:center;margin-bottom:6px}
+.login-card p{color:var(--muted);font-size:12px;text-align:center}
+.login-card .btn{width:100%}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0);pointer-events:none}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="login-card">
+    <div class="logo">DIORS<span> WEB.</span></div>
+    <p>Admin sign in</p>
+    <label for="loginEmail">Email</label>
+    <input id="loginEmail" type="email" autocomplete="username">
+    <label for="loginPass">Password</label>
+    <input id="loginPass" type="password" autocomplete="current-password">
+    <button class="btn" id="loginBtn">Sign in</button>
+  </div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+
+<aside class="sidebar" id="sidebar" aria-label="Main navigation">
+  <div class="logo">DIORS<span> WEB.</span></div>
+
+  <div class="menu-title">MAIN MENU</div>
+  <button class="nav-item active" data-panel="overview">◈ Dashboard</button>
+  <button class="nav-item" data-panel="profile">◉ Profile manager</button>
+  <button class="nav-item" data-panel="projects">▣ Projects <span class="badge" id="badgeProjects">0</span></button>
+  <button class="nav-item" data-panel="gallery">▧ Gallery <span class="badge" id="badgeGallery">0</span></button>
+  <button class="nav-item" data-panel="announcements">◇ Announcements <span class="badge" id="badgeAnnouncements">0</span></button>
+
+  <div class="menu-title">CONFIGURATION</div>
+  <button class="nav-item" data-panel="settings">⚙ Website settings</button>
+
+  <div class="admin-info">
+    <div class="admin-avatar" id="avatar">PD</div>
+    <div><strong id="sideName">Prince Dior</strong><small>Website owner</small></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="mobile-menu" id="menuBtn" aria-label="Open menu" aria-expanded="false">☰</button>
+      <div>
+        <h2>Admin dashboard</h2>
+        <p>Manage your digital empire.</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center"><div class="status"><i></i>ADMIN MODE</div><button class="btn ghost" id="logout">Log out</button></div>
+  </div>
+
+  <section class="panel active" id="overview">
+    <div class="welcome">
+      <h1 id="welcomeTitle">Welcome back, Prince Dior.</h1>
+      <p>Your digital space. Your identity. Your control.<br>Manage DIORS WEB from one place.</p>
+    </div>
+    <div class="cards">
+      <div class="stat-card"><div class="icon">▣</div><h3 id="projectCount">0</h3><p>Total projects</p></div>
+      <div class="stat-card"><div class="icon">▧</div><h3 id="galleryCount">0</h3><p>Gallery images</p></div>
+      <div class="stat-card"><div class="icon">◇</div><h3 id="announcementCount">0</h3><p>Announcements</p></div>
+    </div>
+    <div class="content-box">
+      <h3>System overview</h3>
+      <p class="hint" style="margin-top:12px;font-size:13px;line-height:2">
+        Dashboard loaded successfully.<br>
+        Storage: saved in this browser for now.<br>
+        Database connection (Firebase): not connected yet.
+      </p>
+    </div>
+  </section>
+
+  <section class="panel" id="profile">
+    <h2 class="section-title">Profile manager</h2>
+    <div class="content-box">
+      <h3>Personal information</h3>
+      <label for="profileName">Display name</label>
+      <input id="profileName" value="PRINCE DIOR" maxlength="60">
+      <label for="profileBio">Profile bio</label>
+      <textarea id="profileBio" maxlength="300">Beyond the ordinary. Driven by ambition. Building a legacy beyond imagination.</textarea>
+      <label for="profileImage">Profile image URL</label>
+      <input id="profileImage" type="url" placeholder="https://…">
+      <label class="btn" id="uploadProfile" for="profileFile" style="display:inline-block;margin:12px 0 0;font-size:13px;color:#fff;cursor:pointer">📷 Upload photo</label>
+      <input id="profileFile" class="vh" type="file" accept="image/*">
+      <button class="btn" id="saveProfile">Save profile</button>
+    </div>
+  </section>
+
+  <section class="panel" id="projects">
+    <h2 class="section-title">Project manager</h2>
+    <div class="content-box">
+      <h3>Add new project</h3>
+      <label for="projectName">Project name</label>
+      <input id="projectName" placeholder="Enter project name" maxlength="80">
+      <label for="projectDescription">Project description</label>
+      <textarea id="projectDescription" placeholder="Describe your project" maxlength="400"></textarea>
+      <button class="btn" id="addProject">Add project</button>
+    </div>
+    <div class="content-box">
+      <h3>My projects</h3>
+      <div class="list" id="projectList"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="gallery">
+    <h2 class="section-title">Gallery manager</h2>
+    <div class="content-box">
+      <h3>Add gallery image</h3>
+      <label for="galleryImage">Image URL</label>
+      <input id="galleryImage" type="url" placeholder="https://…">
+      <button class="btn" id="addGallery">Add image</button>
+      <label class="btn" id="uploadGallery" for="galleryFile" style="display:inline-block;margin:17px 0 0 10px;font-size:13px;color:#fff;cursor:pointer">📷 Upload picture</label>
+      <input id="galleryFile" class="vh" type="file" accept="image/*" multiple>
+      <p class="hint" id="uploadStatus" style="margin-top:12px"></p>
+      <div class="list" id="galleryList"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="announcements">
+    <h2 class="section-title">Announcements</h2>
+    <div class="content-box">
+      <h3>Publish announcement</h3>
+      <label for="announcementTitle">Title</label>
+      <input id="announcementTitle" placeholder="Enter title" maxlength="80">
+      <label for="announcementMessage">Message</label>
+      <textarea id="announcementMessage" placeholder="Write your announcement" maxlength="600"></textarea>
+      <button class="btn" id="addAnnouncement">Publish</button>
+      <div class="list" id="announcementList"></div>
+    </div>
+  </section>
+
+  <section class="panel" id="settings">
+    <h2 class="section-title">Website settings</h2>
+    <div class="content-box">
+      <h3>Social links</h3>
+      <label for="telegramLink">Telegram link</label>
+      <input id="telegramLink" type="url" placeholder="https://t.me/yourusername">
+      <label for="whatsappLink">WhatsApp link</label>
+      <input id="whatsappLink" type="url" placeholder="https://wa.me/234…">
+      <label for="contactEmail">Contact email</label>
+      <input id="contactEmail" type="email" placeholder="you@example.com">
+      <button class="btn" id="saveSettings">Save settings</button>
+    </div>
+  </section>
+</main>
+
+<div id="toasts" aria-live="polite"></div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getFirestore,doc,getDoc,setDoc,collection,getDocs,addDoc,deleteDoc,query,orderBy} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+const app=initializeApp({apiKey:"AIzaSyCOUKAzxKQm5uwil8kJbmRrY7gnj3bFfgE",authDomain:"diors-web.firebaseapp.com",projectId:"diors-web",storageBucket:"diors-web.firebasestorage.app",messagingSenderId:"731937530892",appId:"1:731937530892:web:e121b7c11c6ce58861ba29"});
+const fs=getFirestore(app),auth=getAuth(app);
+(function(){
+  var $=function(s){return document.querySelector(s)},$$=function(s){return [].slice.call(document.querySelectorAll(s))};
+
+  var db={projects:[],gallery:[],announcements:[],profile:{},settings:{}};
+  var ref=doc(fs,'site','content');
+  var profilePic='';
+  function save(){var o=Object.assign({},db);delete o.gallery;return setDoc(ref,o).catch(function(e){toast('Save failed: '+(e.code||e.message),1)})}
+
+  /* toast */
+  function toast(msg,err){
+    var t=document.createElement('div');t.className='toast'+(err?' error':'');t.textContent=msg;$('#toasts').appendChild(t);
+    setTimeout(function(){t.classList.add('out');setTimeout(function(){t.remove()},360)},err?7000:2600);
+  }
+  function invalid(el){el.classList.remove('invalid');void el.offsetWidth;el.classList.add('invalid');el.addEventListener('input',function f(){el.classList.remove('invalid');el.removeEventListener('input',f)})}
+  function safeUrl(v){try{var u=new URL(v);return /^https?:$/.test(u.protocol)?u.href:null}catch(e){return null}}
+
+  /* animated number */
+  function countTo(el,to){
+    var from=+el.textContent||0;if(from===to)return;
+    var t0=performance.now(),d=700;
+    (function step(t){var p=Math.min(1,(t-t0)/d),e=1-Math.pow(1-p,3);el.textContent=Math.round(from+(to-from)*e);if(p<1)requestAnimationFrame(step)})(t0);
+  }
+  function counts(){
+    [['projects','project'],['gallery','gallery'],['announcements','announcement']].forEach(function(p){
+      countTo($('#'+p[1]+'Count'),db[p[0]].length);
+      $('#badge'+p[0][0].toUpperCase()+p[0].slice(1)).textContent=db[p[0]].length;
+    });
+  }
+
+  /* navigation */
+  var side=$('#sidebar'),back=$('#backdrop'),mb=$('#menuBtn');
+  function menu(o){side.classList.toggle('open',o);back.classList.toggle('show',o);mb.setAttribute('aria-expanded',o)}
+  mb.onclick=function(){menu(!side.classList.contains('open'))};
+  back.onclick=function(){menu(false)};
+  addEventListener('keydown',function(e){if(e.key==='Escape')menu(false)});
+  $$('.nav-item').forEach(function(b){
+    b.onclick=function(){
+      $$('.panel').forEach(function(p){p.classList.remove('active')});
+      $$('.nav-item').forEach(function(n){n.classList.remove('active')});
+      $('#'+b.dataset.panel).classList.add('active');b.classList.add('active');menu(false);scrollTo({top:0,behavior:'smooth'});
+    };
+  });
+
+  /* generic list renderer with animated delete */
+  function render(listEl,arr,emptyMsg,build,key){
+    listEl.innerHTML='';
+    if(!arr.length){var e=document.createElement('div');e.className='empty';e.textContent=emptyMsg;listEl.appendChild(e)}
+    arr.forEach(function(data,i){
+      var item=document.createElement('div');item.className='item';item.style.animationDelay=Math.min(i*.05,.4)+'s';
+      var body=document.createElement('div');body.className='item-body';build(body,data);
+      var del=document.createElement('button');del.className='btn ghost';del.textContent='Delete';
+      del.onclick=function(){
+        item.classList.add('leaving');
+        setTimeout(function(){arr.splice(arr.indexOf(data),1);if(data&&data.id)deleteDoc(doc(fs,'gallery',data.id)).catch(function(e){toast('Delete failed: '+(e.code||e.message),1)});else save();render(listEl,arr,emptyMsg,build,key);counts();toast('Deleted.')},330);
+      };
+      item.append(body,del);listEl.appendChild(item);
+    });
+  }
+  function text(tag,t){var e=document.createElement(tag);e.textContent=t;return e}
+
+  function renderProjects(){render($('#projectList'),db.projects,'No projects added yet.',function(b,p){b.append(text('strong',p.name),text('p',p.description))})}
+  function renderGallery(){render($('#galleryList'),db.gallery,'Your gallery is empty.',function(b,g){var url=g.src;
+    var img=document.createElement('img');img.src=url;img.alt='Gallery image';img.loading='lazy';
+    img.onerror=function(){img.replaceWith(text('p','Image could not load.'))};b.appendChild(img)})}
+  function renderAnnouncements(){render($('#announcementList'),db.announcements,'No announcements yet.',function(b,a){b.append(text('strong',a.title),text('p',a.message))})}
+
+/* add actions */
+  $('#addProject').onclick=function(){
+    var n=$('#projectName'),d=$('#projectDescription');
+    if(!n.value.trim()){invalid(n);return toast('Add a project name.',1)}
+    if(!d.value.trim()){invalid(d);return toast('Add a project description.',1)}
+    db.projects.unshift({name:n.value.trim(),description:d.value.trim()});
+    n.value=d.value='';save();renderProjects();counts();toast('Project added.');
+  };
+  function compress(file,max,q){return new Promise(function(res,rej){
+    var img=new Image(),u=URL.createObjectURL(file);
+    img.onload=function(){
+      var r=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');
+      c.width=Math.round(img.width*r);c.height=Math.round(img.height*r);
+      var x=c.getContext('2d');x.fillStyle='#130E1C';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(u);res(c.toDataURL('image/jpeg',q));
+    };
+    img.onerror=function(){rej(new Error('That file is not an image.'))};img.src=u;
+  })}
+  function addToGallery(src){
+    if(src.length>950000)return Promise.reject(new Error('Image is too large.'));
+    return addDoc(collection(fs,'gallery'),{src:src,createdAt:Date.now()}).then(function(r){db.gallery.unshift({id:r.id,src:src})});
+  }
+  $('#addGallery').onclick=function(){
+    var i=$('#galleryImage'),u=safeUrl(i.value.trim());
+    if(!u){invalid(i);return toast('Enter a valid http(s) image URL.',1)}
+    addToGallery(u).then(function(){i.value='';renderGallery();counts();toast('Image added.')}).catch(function(e){toast('Failed: '+(e.code||e.message),1)});
+  };
+  $('#galleryFile').onchange=function(e){
+    var files=[].slice.call(e.target.files),ok=0,fail='',st=$('#uploadStatus');
+    e.target.value='';
+    if(!files.length){st.textContent='No picture selected.';return}
+    st.textContent='Uploading '+files.length+' picture(s)…';
+    files.reduce(function(p,f){
+      return p.then(function(){return compress(f,1400,.8).then(addToGallery).then(function(){ok++})}).catch(function(err){fail=err.code||err.message});
+    },Promise.resolve()).then(function(){
+      renderGallery();counts();
+      st.textContent=(ok?ok+' added. ':'')+(fail?'Error: '+fail:'');
+      if(fail)toast('Upload error: '+fail,1);else toast(ok+' picture'+(ok>1?'s':'')+' added.');
+    });
+  };
+  $('#profileFile').onchange=function(e){
+    var f=e.target.files[0];e.target.value='';if(!f)return;
+    compress(f,600,.85).then(function(d){profilePic=d;$('#profileImage').value='';$('#profileImage').placeholder='✓ Photo selected: press Save profile';toast('Photo ready. Press Save profile.')}).catch(function(err){toast(err.message,1)});
+  };
+
+  $('#addAnnouncement').onclick=function(){
+    var t=$('#announcementTitle'),m=$('#announcementMessage');
+    if(!t.value.trim()){invalid(t);return toast('Add a title.',1)}
+    if(!m.value.trim()){invalid(m);return toast('Add a message.',1)}
+    db.announcements.unshift({title:t.value.trim(),message:m.value.trim()});
+    t.value=m.value='';save();renderAnnouncements();counts();toast('Announcement published.');
+  };
+
+  /* profile */
+  function applyProfile(){
+    var p=db.profile,name=p.name||'PRINCE DIOR',nice=name.toLowerCase().replace(/(^|\s)\S/g,function(c){return c.toUpperCase()});
+    $('#sideName').textContent=nice;$('#welcomeTitle').textContent='Welcome back, '+nice+'.';
+    var av=$('#avatar');av.innerHTML='';
+    if(p.image){var img=document.createElement('img');img.src=p.image;img.alt='';img.onerror=function(){av.textContent=initials(name)};av.appendChild(img)}
+    else av.textContent=initials(name);
+  }
+  function initials(n){return n.split(/\s+/).map(function(w){return w[0]}).join('').slice(0,2).toUpperCase()||'PD'}
+  $('#saveProfile').onclick=function(){
+    var n=$('#profileName'),im=$('#profileImage'),url=profilePic||db.profile.image||'';
+    if(!n.value.trim()){invalid(n);return toast('Display name can’t be empty.',1)}
+    if(!profilePic&&im.value.trim()){url=safeUrl(im.value.trim());if(!url){invalid(im);return toast('Enter a valid image URL.',1)}}
+    db.profile={name:n.value.trim(),bio:$('#profileBio').value.trim(),image:url};save();applyProfile();profilePic='';$('#profileImage').placeholder='https://…';toast('Profile saved.');
+  };
+
+  /* settings */
+  $('#saveSettings').onclick=function(){
+    var f=[['telegramLink',1],['whatsappLink',1],['contactEmail',0]],out={};
+    for(var i=0;i<f.length;i++){
+      var el=$('#'+f[i][0]),v=el.value.trim();
+      if(v&&f[i][1]&&!safeUrl(v)){invalid(el);return toast('Check the link format.',1)}
+      if(v&&!f[i][1]&&!/^\S+@\S+\.\S+$/.test(v)){invalid(el);return toast('Check the email address.',1)}
+      out[f[i][0]]=v;
+    }
+    db.settings=out;save();toast('Settings saved.');
+  };
+
+  /* fill forms, then login / load */
+  function fill(){
+    var p=db.profile;
+    $('#profileName').value=p.name||'PRINCE DIOR';
+    if(p.bio)$('#profileBio').value=p.bio;
+    $('#profileImage').value=(p.image&&p.image.indexOf('data:')===0)?'':(p.image||'');
+    ['telegramLink','whatsappLink','contactEmail'].forEach(function(k){$('#'+k).value=db.settings[k]||''});
+    applyProfile();renderProjects();renderGallery();renderAnnouncements();counts();
+  }
+  var login=$('#login');
+  onAuthStateChanged(auth,function(user){
+    if(!user){login.classList.remove('hide');return}
+    getDoc(ref).then(function(s){
+      var d=s.exists()?s.data():{};
+      Object.keys(db).forEach(function(k){if(k!=='gallery'&&d[k])db[k]=d[k]});
+      return getDocs(query(collection(fs,'gallery'),orderBy('createdAt','desc'))).then(function(g){
+        db.gallery=g.docs.map(function(x){return {id:x.id,src:x.data().src}});
+      }).catch(function(e){toast('Gallery load failed: '+(e.code||e.message),1)}).then(function(){fill();login.classList.add('hide')});
+    }).catch(function(e){toast('Load failed: '+(e.code||e.message),1)});
+  });
+  function signIn(){
+    signInWithEmailAndPassword(auth,$('#loginEmail').value.trim(),$('#loginPass').value)
+      .then(function(){$('#loginPass').value=''})
+      .catch(function(e){toast('Sign in failed: '+(e.code||e.message),1)});
+  }
+  $('#loginBtn').onclick=signIn;
+  $('#loginPass').addEventListener('keydown',function(e){if(e.key==='Enter')signIn()});
+  $('#logout').onclick=function(){signOut(auth)};
+})();
+</script>
+</body>
+</html>

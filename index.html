@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#08060D">
+<title>DIORS WEB | Prince Dior</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#08060D;--card:#130E1C;--purple:#9B4DFF;--light:#C18AFF;--text:#F8F3FF;--muted:#A69AB5;--border:#30203F;
+  --ease:cubic-bezier(.22,1,.36,1);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-behavior:smooth;scroll-padding-top:calc(80px + env(safe-area-inset-top,0px))}
+*,*::before,*::after{margin:0;padding:0;box-sizing:inherit;font-family:'Inter',Arial,sans-serif}
+body{background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--light);outline-offset:3px}
+
+/* ambient glow */
+.glow{position:fixed;width:420px;height:420px;border-radius:50%;background:#7925C5;filter:blur(150px);opacity:.14;pointer-events:none;z-index:-1;will-change:transform}
+.glow-one{top:80px;left:-200px;animation:drift 18s ease-in-out infinite alternate}
+.glow-two{right:-200px;top:600px;animation:drift 22s ease-in-out infinite alternate-reverse}
+@keyframes drift{to{transform:translate3d(60px,80px,0)}}
+
+/* scroll progress */
+#progress{position:fixed;top:0;left:0;height:2px;width:100%;background:linear-gradient(90deg,#9B4DFF,#E0BFFF);transform:scaleX(0);transform-origin:left;z-index:200}
+
+/* cursor */
+.cursor-dot,.cursor-ring{position:fixed;top:0;left:0;pointer-events:none;border-radius:50%;opacity:0;transition:opacity .3s;will-change:transform}
+.cursor-dot{width:7px;height:7px;background:#D8B5FF;box-shadow:0 0 15px #B45AFF;z-index:10000;margin:-3.5px 0 0 -3.5px}
+.cursor-ring{width:34px;height:34px;border:1px solid #B45AFF;box-shadow:0 0 15px #9B4DFF55;z-index:9999;margin:-17px 0 0 -17px;transition:opacity .3s,width .35s var(--ease),height .35s var(--ease),margin .35s var(--ease),background .3s}
+.cursor-ring.active{width:56px;height:56px;margin:-28px 0 0 -28px;background:#9B4DFF18}
+body.has-cursor .cursor-dot,body.has-cursor .cursor-ring{opacity:1}
+@media (hover:none),(max-width:850px){.cursor-dot,.cursor-ring{display:none}}
+
+/* loader */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .9s var(--ease),visibility .9s}
+#loader.hide{opacity:0;visibility:hidden}
+.loader-logo{font-size:32px;font-weight:900;letter-spacing:4px;animation:pulse 1.4s ease-in-out infinite alternate}
+.loader-logo span{color:var(--light)}
+.loader-line{width:150px;height:3px;background:#281638;border-radius:10px;margin-top:25px;overflow:hidden}
+.loader-line div{width:40%;height:100%;background:var(--light);box-shadow:0 0 15px var(--light);animation:load 1.4s var(--ease) infinite}
+#loader p{font-size:9px;color:#9B83B0;letter-spacing:3px;margin-top:18px}
+@keyframes load{from{transform:translateX(-100%)}to{transform:translateX(350%)}}
+@keyframes pulse{from{opacity:.5;text-shadow:0 0 5px #9B4DFF}to{opacity:1;text-shadow:0 0 25px #9B4DFF}}
+
+/* reveal: opacity/transform only, staggered via --d */
+.reveal{opacity:0;transform:translate3d(0,32px,0);transition:opacity 1s var(--ease) var(--d,0s),transform 1s var(--ease) var(--d,0s)}
+.reveal.visible{opacity:1;transform:none}
+.reveal.done{transition:none}
+
+/* nav */
+header{position:fixed;top:0;width:100%;z-index:100;padding-top:env(safe-area-inset-top,0px);background:rgba(8,6,13,.8);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(193,138,255,.12);transition:background .4s}
+.navbar{max-width:1200px;margin:auto;padding:19px 25px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:22px;font-weight:900;letter-spacing:2px}
+.logo span{color:var(--light)}
+.nav-links{display:flex;gap:28px;align-items:center}
+.nav-links a{font-size:12px;color:var(--muted);position:relative;transition:color .3s}
+.nav-links a:not(.nav-contact)::after{content:"";position:absolute;left:0;bottom:-6px;width:100%;height:1px;background:var(--light);transform:scaleX(0);transform-origin:right;transition:transform .45s var(--ease)}
+.nav-links a:not(.nav-contact):hover,.nav-links a.current{color:var(--light)}
+.nav-links a:not(.nav-contact):hover::after,.nav-links a.current::after{transform:scaleX(1);transform-origin:left}
+.nav-contact{padding:11px 18px;background:linear-gradient(120deg,#9B4DFF,#6424A0);color:#fff!important;border-radius:8px;transition:transform .4s var(--ease),box-shadow .4s}
+.nav-contact:hover{transform:translateY(-2px);box-shadow:0 8px 24px #9B4DFF45}
+.menu-btn{display:none;background:transparent;color:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:20px}
+
+/* hero */
+.hero{max-width:1200px;min-height:730px;margin:auto;padding:150px 25px 90px;display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:50px}
+.eyebrow{display:inline-flex;align-items:center;gap:9px;border:1px solid #553273;background:#1B1029;color:#D8B6FF;border-radius:30px;padding:9px 14px;font-size:10px;letter-spacing:2px;margin-bottom:25px}
+.live-dot{width:7px;height:7px;background:#BA75FF;border-radius:50%;box-shadow:0 0 12px #BA75FF;animation:blink 2s ease-in-out infinite}
+@keyframes blink{50%{opacity:.35;transform:scale(.8)}}
+.hero h1{font-size:clamp(43px,6vw,76px);font-weight:900;line-height:1.08;letter-spacing:-3px}
+.hero h1 span{display:block;color:transparent;background:linear-gradient(100deg,#A84DFF,#E0BFFF,#8D3BE8,#E0BFFF);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;animation:shine 7s linear infinite}
+@keyframes shine{to{background-position:-250% 0}}
+.hero-description{max-width:480px;color:var(--muted);font-size:14px;line-height:1.9;margin:24px 0 30px}
+.hero-buttons{display:flex;gap:13px;flex-wrap:wrap}
+.primary-btn,.secondary-btn{padding:14px 22px;border-radius:9px;font-size:12px;font-weight:700;display:inline-block;will-change:transform;transition:box-shadow .4s,border-color .4s,background .4s}
+.primary-btn{background:linear-gradient(120deg,#A34DFF,#6323A2);color:#fff;box-shadow:0 8px 30px #9B4DFF35}
+.primary-btn:hover{box-shadow:0 12px 40px #9B4DFF60}
+.secondary-btn{border:1px solid #56366F;color:#D7B8F5}
+.secondary-btn:hover{border-color:var(--light);background:#9B4DFF12}
+.hero-note{color:#776A85;font-size:10px;margin-top:35px;letter-spacing:2px}
+.digital-clock{display:inline-flex;align-items:center;gap:15px;margin-top:22px;padding:13px 19px;background:linear-gradient(120deg,#21132F,#120C1A);border:1px solid #56366F;border-radius:13px;box-shadow:0 0 25px #9B4DFF12}
+.clock-icon{font-size:27px;color:var(--light)}
+#liveTime{font-size:19px;font-weight:800;letter-spacing:2px;color:#E4C9FF;font-variant-numeric:tabular-nums}
+#liveDate{color:#9D8BAF;font-size:10px;margin-top:5px}
+
+.typing{margin-top:16px;font-size:clamp(16px,2.4vw,22px);font-weight:600;color:#D8B6FF;min-height:1.6em;display:flex;align-items:center}
+.typing b{font-weight:600;color:var(--light);margin-right:8px}
+.caret{width:2px;height:1.2em;background:var(--light);margin-left:3px;animation:caret 1s steps(1) infinite}
+@keyframes caret{50%{opacity:0}}
+/* profile 3D */
+.visual{min-height:430px;display:flex;justify-content:center;align-items:center;perspective:1000px;position:relative}
+.orbit{position:absolute;width:340px;height:340px;border:1px solid #8D42D855;border-radius:50%;box-shadow:0 0 30px #9B4DFF12;animation:spin 16s linear infinite}
+.orbit-two{width:280px;height:280px;border-color:#C18AFF55;animation-direction:reverse}
+@keyframes spin{from{transform:rotateX(65deg) rotateZ(0)}to{transform:rotateX(65deg) rotateZ(360deg)}}
+.tilt{position:relative;z-index:2;transform-style:preserve-3d;will-change:transform}
+.profile-frame{width:300px;height:360px;border-radius:25px;padding:5px;background:linear-gradient(145deg,#D3A4FF,#54207D,#180E26);box-shadow:0 0 65px #9B4DFF30;animation:float 6s ease-in-out infinite;position:relative}
+.profile-frame img,.monogram{width:100%;height:100%;border-radius:21px;display:block;object-fit:cover}
+.monogram{display:none;place-items:center;background:radial-gradient(circle at 30% 20%,#3B1D57,#130E1C);font-size:78px;font-weight:900;letter-spacing:-4px;color:#E0BFFF}
+.profile-frame.no-img img{display:none}
+.profile-frame.no-img .monogram{display:grid}
+@keyframes float{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-14px,0)}}
+.floating-label{position:absolute;z-index:3;background:#1C112A;border:1px solid #6D3B91;padding:12px 15px;border-radius:10px;font-size:11px;box-shadow:0 10px 30px #0008;transform:translateZ(60px);animation:bob 5s ease-in-out infinite}
+.label-one{left:-5px;top:75px}
+.label-two{right:-5px;bottom:65px;animation-delay:-2.5s}
+@keyframes bob{50%{margin-top:-8px}}
+
+/* sections */
+.content-section{max-width:1200px;margin:auto;padding:85px 25px}
+.section-heading{text-align:center;margin-bottom:45px}
+.section-heading small{color:var(--light);font-size:10px;letter-spacing:3px;font-weight:700}
+.section-heading h2{font-size:clamp(27px,4vw,39px);margin-top:13px;letter-spacing:-1px}
+.section-heading p{max-width:480px;margin:13px auto 0;color:var(--muted);font-size:13px;line-height:1.8}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:25px}
+.about-card{background:linear-gradient(145deg,#191023,#100B17);border:1px solid var(--border);padding:30px;border-radius:17px}
+.about-card h3{font-size:19px;margin-bottom:17px}
+.about-card p{color:var(--muted);font-size:13px;line-height:2}
+.about-mark{color:#B77AFF;font-size:38px;margin-bottom:20px}
+.skills{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.skill{background:#21142F;border:1px solid #49305D;color:#D8B9FA;padding:11px 15px;border-radius:8px;font-size:11px;transition:transform .4s var(--ease),border-color .3s,background .3s}
+.skill:hover{transform:translateY(-4px);border-color:var(--light);background:#2A1A3D}
+
+/* cards */
+.project-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.project-card,.about-card,.gallery-item,.announcement{position:relative}
+.project-card{background:var(--card);border:1px solid var(--border);padding:25px;border-radius:16px;min-height:210px;overflow:hidden;transform-style:preserve-3d;will-change:transform;transition:border-color .4s,box-shadow .4s}
+.project-card::before{content:"";position:absolute;inset:0;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),#9B4DFF22,transparent 70%);opacity:0;transition:opacity .4s;pointer-events:none}
+.project-card:hover{border-color:#9950D1;box-shadow:0 20px 40px #8B35FF20}
+.project-card:hover::before{opacity:1}
+.project-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,#6B2AA2,#271238);font-size:21px;margin-bottom:23px}
+.project-card h3{font-size:16px;margin-bottom:10px}
+.project-card p{color:var(--muted);font-size:12px;line-height:1.8}
+
+/* gallery */
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.gallery-item{height:220px;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#241333,#0F0B16);border:1px solid var(--border);display:grid;place-items:center;color:#A98BBF;font-size:12px}
+.gallery-item img{width:100%;height:100%;object-fit:cover;cursor:zoom-in;transition:transform .9s var(--ease)}
+.gallery-item:hover img{transform:scale(1.07)}
+.gallery-item.no-img img{display:none}
+.gallery-item.no-img::after{content:"✦ Photo coming soon"}
+
+/* viewer */
+#imageViewer{position:fixed;inset:0;z-index:9998;background:rgba(5,3,10,.94);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);display:flex;align-items:center;justify-content:center;flex-direction:column;padding:25px;opacity:0;visibility:hidden;transition:opacity .45s var(--ease),visibility .45s}
+#imageViewer.show{opacity:1;visibility:visible}
+#viewerImage{max-width:90%;max-height:75vh;object-fit:contain;border-radius:15px;border:2px solid #A34DFF;box-shadow:0 0 45px #9B4DFF55;transform:scale(.88);transition:transform .6s var(--ease)}
+#imageViewer.show #viewerImage{transform:scale(1)}
+#imageViewer p{color:var(--light);font-size:10px;letter-spacing:4px;margin-top:22px}
+.viewer-close{position:absolute;top:calc(25px + env(safe-area-inset-top,0px));right:25px;width:42px;height:42px;background:#281638;border:1px solid #8B35FF;border-radius:50%;color:#fff;font-size:20px;transition:transform .4s var(--ease)}
+.viewer-close:hover{transform:rotate(90deg)}
+
+/* announcement + contact */
+.announcement{background:linear-gradient(120deg,#21132F,#120D19);border:1px solid #52336D;padding:25px;border-radius:15px;max-width:750px;margin:auto}
+.announcement-tag{color:var(--light);font-size:10px;letter-spacing:2px}
+.announcement h3{margin:13px 0;font-size:18px}
+.announcement p{color:var(--muted);font-size:13px;line-height:1.8}
+.contact-box{text-align:center;background:radial-gradient(circle at top,#32194C,#120C1A 65%);border:1px solid #5C3978;padding:55px 20px;border-radius:20px}
+.contact-box h2{font-size:30px;margin-bottom:15px}
+.contact-box p{color:#B3A3C1;font-size:13px;line-height:1.8;max-width:480px;margin:0 auto 25px}
+.contact-links{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+footer{border-top:1px solid var(--border);padding:30px 20px;text-align:center;color:#81738E;font-size:11px}
+footer strong{color:var(--light)}
+
+/* mobile */
+@media(max-width:850px){
+  .hero{grid-template-columns:1fr;text-align:center;padding-top:140px;gap:25px}
+  .hero-description{margin-left:auto;margin-right:auto}
+  .hero-buttons{justify-content:center}
+  .typing{justify-content:center}
+  .about-grid{grid-template-columns:1fr}
+  .project-grid{grid-template-columns:1fr 1fr}
+  .nav-links{position:absolute;top:100%;left:0;width:100%;padding:25px;background:#100B19;border-bottom:1px solid var(--border);flex-direction:column;align-items:flex-start;opacity:0;visibility:hidden;transform:translateY(-10px);transition:opacity .4s var(--ease),transform .4s var(--ease),visibility .4s}
+  .nav-links.show{opacity:1;visibility:visible;transform:none}
+  .menu-btn{display:block}
+}
+@media(max-width:520px){
+  .hero h1{font-size:44px}
+  .profile-frame{width:260px;height:320px}
+  .orbit{width:290px;height:290px}.orbit-two{width:240px;height:240px}
+  .project-grid,.gallery-grid{grid-template-columns:1fr 1fr}
+  .gallery-item{height:150px}
+  .content-section{padding:65px 18px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<div id="loader">
+  <div class="loader-logo">DIORS<span> WEB.</span></div>
+  <div class="loader-line"><div></div></div>
+  <p>ENTERING THE DIGITAL WORLD</p>
+</div>
+
+<div class="glow glow-one"></div>
+<div class="glow glow-two"></div>
+
+<header>
+  <nav class="navbar">
+    <a href="#home" class="logo">DIORS<span> WEB.</span></a>
+    <button class="menu-btn" id="menuBtn" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    <div class="nav-links" id="navLinks">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#projects">Projects</a>
+      <a href="#gallery">Gallery</a>
+      <a href="#announcements">Updates</a>
+      <a href="#contact" class="nav-contact">Contact me</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+<section class="hero" id="home">
+  <div>
+    <div class="eyebrow"><span class="live-dot"></span>PERSONAL DIGITAL SPACE</div>
+    <h1>Beyond The <span>Ordinary.</span></h1>
+    <div class="typing" aria-label="Website builder, digital creator, brand builder"><b>I’m a</b><span id="typed"></span><i class="caret"></i></div>
+    <p class="hero-description">Welcome to my digital world. A space where creativity, technology and ambition come together. I’m building ideas, exploring possibilities and creating my own legacy.</p>
+    <div class="hero-buttons">
+      <a href="#projects" class="primary-btn magnetic">Explore my work ↗</a>
+      <a href="#about" class="secondary-btn magnetic">Discover my story</a>
+    </div>
+    <div class="hero-note">DREAM · CODE · INNOVATE</div>
+    <div class="digital-clock">
+      <div class="clock-icon">◷</div>
+      <div><div id="liveTime">00:00:00</div><div id="liveDate">Loading date…</div></div>
+    </div>
+  </div>
+
+  <div class="visual" id="visual">
+    <div class="orbit"></div>
+    <div class="orbit orbit-two"></div>
+    <div class="tilt" id="tilt">
+      <div class="profile-frame" id="profileFrame">
+        <img src="file_00000000d90881f4b12b17d00e997033.png" alt="Prince Dior" data-fallback="profileFrame">
+        <div class="monogram" aria-hidden="true">PD</div>
+      </div>
+      <div class="floating-label label-one">✦ Digital Creator</div>
+      <div class="floating-label label-two">⌘ Building Ideas</div>
+    </div>
+  </div>
+</section>
+
+<section class="content-section" id="about">
+  <div class="section-heading">
+    <small>THE PERSON BEHIND THE VISION</small>
+    <h2>About Me</h2>
+    <p>Every great journey starts with an idea and the courage to build it.</p>
+  </div>
+  <div class="about-grid">
+    <div class="about-card">
+      <div class="about-mark">✧</div>
+      <h3>I’m Prince Dior.</h3>
+      <p>A creative individual with a passion for technology, digital projects and discovering new possibilities. I believe in learning, experimenting and turning imagination into something real.</p>
+    </div>
+    <div class="about-card">
+      <div class="about-mark">⌘</div>
+      <h3>My Vision</h3>
+      <p>To keep growing, create meaningful digital experiences and build projects that reflect creativity, ambition and originality. This is only the beginning.</p>
+    </div>
+  </div>
+  <div class="section-heading" style="margin:55px 0 20px">
+    <small>MY CREATIVE INTERESTS</small>
+    <h2>What I Explore</h2>
+  </div>
+  <div class="skills">
+    <div class="skill">Web Development</div><div class="skill">Creative Design</div><div class="skill">Technology</div>
+    <div class="skill">Digital Innovation</div><div class="skill">Entrepreneurship</div><div class="skill">Brand Building</div>
+  </div>
+</section>
+
+<section class="content-section" id="projects">
+  <div class="section-heading">
+    <small>MY DIGITAL UNIVERSE</small>
+    <h2>Featured Projects</h2>
+    <p>A collection of ideas, experiments and digital creations.</p>
+  </div>
+  <div class="project-grid">
+    <div class="project-card"><div class="project-icon">◈</div><h3>Web Experiences</h3><p>Exploring modern websites, interfaces and creative digital experiences.</p></div>
+    <div class="project-card"><div class="project-icon">⌘</div><h3>Automation</h3><p>Building tools and automated systems that make digital tasks easier.</p></div>
+    <div class="project-card"><div class="project-icon">✧</div><h3>Creative Designs</h3><p>Experimenting with visual identities, branding and unique designs.</p></div>
+  </div>
+</section>
+
+<section class="content-section" id="gallery">
+  <div class="section-heading">
+    <small>VISUAL COLLECTION</small>
+    <h2>My Gallery</h2>
+    <p>A glimpse into my creative world.</p>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-item"><img src="file_00000000d90881f4b12b17d00e997033.png" alt="Prince Dior profile portrait" data-fallback="parent"></div>
+    <div class="gallery-item"><span>✦ More coming soon</span></div>
+    <div class="gallery-item"><span>✧ More coming soon</span></div>
+  </div>
+</section>
+
+
+<section class="content-section" id="contact">
+  <div class="contact-box">
+    <div class="section-heading" style="margin-bottom:20px"><small>LET’S CONNECT</small></div>
+    <h2>Have An Idea?</h2>
+    <p>Interested in connecting, collaborating or discussing something creative? Feel free to reach out.</p>
+    <div class="contact-links">
+      <a href="https://t.me/nightfallx01?text=Hello%20Prince%2C%20I%27m%20interested%20in%20having%20a%20professional%20website%20built.%20I%27d%20like%20to%20discuss%20the%20details%20and%20get%20a%20quote.%20Thank%20you." class="primary-btn magnetic" target="_blank" rel="noopener">Telegram ↗</a>
+      <a href="https://wa.me/2349019029740?text=Hello%20Prince%2C%20I%27m%20interested%20in%20having%20a%20professional%20website%20built.%20I%27d%20like%20to%20discuss%20the%20details%20and%20get%20a%20quote.%20Thank%20you." class="secondary-btn magnetic" target="_blank" rel="noopener">WhatsApp ↗</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <p>© 2026 <strong>DIORS WEB.</strong> All rights reserved.</p>
+  <p style="margin-top:9px">Designed with ambition · Built by Prince Dior</p>
+</footer>
+
+<div id="imageViewer" role="dialog" aria-label="Image preview">
+  <button class="viewer-close" id="viewerClose" aria-label="Close preview">✕</button>
+  <img id="viewerImage" src="" alt="Gallery preview">
+  <p>DIORS WEB · GALLERY</p>
+</div>
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<script>
+(function(){
+  var $=function(s,c){return (c||document).querySelector(s)},$$=function(s,c){return [].slice.call((c||document).querySelectorAll(s))};
+  var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var fine=matchMedia('(hover:hover) and (pointer:fine)').matches&&innerWidth>850;
+
+  /* image fallbacks (no broken icons if file_00000000d90881f4b12b17d00e997033.png is missing) */
+  $$('img[data-fallback]').forEach(function(img){
+    function fail(){var t=img.dataset.fallback==='parent'?img.parentElement:document.getElementById(img.dataset.fallback);t.classList.add('no-img')}
+    img.addEventListener('error',fail);
+    if(img.complete&&!img.naturalWidth)fail();
+  });
+
+  /* loader: hides as soon as page is ready (min 900ms so it never flashes) */
+  var start=performance.now();
+  function hideLoader(){var wait=Math.max(0,900-(performance.now()-start));setTimeout(function(){$('#loader').classList.add('hide');document.body.classList.add('ready');runReveals()},wait)}
+  if(document.readyState==='complete')hideLoader();else addEventListener('load',hideLoader);
+
+  /* staggered scroll reveal */
+  var els=$$('.hero > div, .content-section > *, .about-card, .project-card, .skill, .gallery-item, .announcement, .contact-box');
+  els.forEach(function(el){
+    el.classList.add('reveal');
+    var sib=el.parentElement.children,i=[].indexOf.call(sib,el);
+    el.style.setProperty('--d',(el.matches('.about-card,.project-card,.gallery-item,.skill')?i*.1:0)+'s');
+  });
+  var io;
+  function runReveals(){
+    io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting)return;
+        var t=e.target;t.classList.add('visible');io.unobserve(t);
+        setTimeout(function(){t.classList.add('done')},1400); /* release transition so hover/tilt stay instant */
+      });
+    },{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+    els.forEach(function(el){io.observe(el)});
+  }
+
+  /* menu */
+  var nav=$('#navLinks'),mb=$('#menuBtn');
+  function setMenu(o){nav.classList.toggle('show',o);mb.setAttribute('aria-expanded',o)}
+  mb.addEventListener('click',function(){setMenu(!nav.classList.contains('show'))});
+  $$('.nav-links a').forEach(function(a){a.addEventListener('click',function(){setMenu(false)})});
+
+  /* scroll progress + active nav link (one rAF-throttled handler) */
+  var bar=$('#progress'),ticking=false,secs=$$('section[id]'),links=$$('.nav-links a');
+  function onScroll(){
+    var h=document.documentElement,max=h.scrollHeight-innerHeight;
+    bar.style.transform='scaleX('+(max>0?scrollY/max:0)+')';
+    var cur='home';secs.forEach(function(s){if(s.getBoundingClientRect().top<innerHeight*.4)cur=s.id});
+    links.forEach(function(a){a.classList.toggle('current',a.getAttribute('href')==='#'+cur&&!a.classList.contains('nav-contact'))});
+    ticking=false;
+  }
+  addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll)}},{passive:true});
+  onScroll();
+
+  /* smooth cursor (lerped on a single rAF loop) */
+  if(fine&&!reduce){
+    var dot=$('#cursorDot'),ring=$('#cursorRing'),mx=0,my=0,rx=0,ry=0,seen=false;
+    addEventListener('mousemove',function(e){
+      mx=e.clientX;my=e.clientY;
+      if(!seen){seen=true;rx=mx;ry=my;document.body.classList.add('has-cursor')}
+      dot.style.transform='translate3d('+mx+'px,'+my+'px,0)';
+    });
+    document.addEventListener('mouseleave',function(){document.body.classList.remove('has-cursor');seen=false});
+    $$('a,button,.project-card,.skill,.gallery-item img').forEach(function(el){
+      el.addEventListener('mouseenter',function(){ring.classList.add('active')});
+      el.addEventListener('mouseleave',function(){ring.classList.remove('active')});
+    });
+    (function loop(){rx+=(mx-rx)*.16;ry+=(my-ry)*.16;ring.style.transform='translate3d('+rx+'px,'+ry+'px,0)';requestAnimationFrame(loop)})();
+  }
+
+  /* eased tilt helper: target → current, spring-like lerp */
+  function tilt(el,opts){
+    var tx=0,ty=0,cx=0,cy=0,run=false,rect;
+    function frame(){
+      cx+=(tx-cx)*.12;cy+=(ty-cy)*.12;
+      el.style.transform='perspective(1000px) rotateX('+cy.toFixed(2)+'deg) rotateY('+cx.toFixed(2)+'deg)'+(opts.lift?' translate3d(0,'+(-opts.lift*(Math.abs(cx)+Math.abs(cy)>.1?1:0))+'px,0)':'');
+      if(Math.abs(tx-cx)>.01||Math.abs(ty-cy)>.01)requestAnimationFrame(frame);else run=false;
+    }
+    function kick(){if(!run){run=true;requestAnimationFrame(frame)}}
+    return {
+      move:function(e,box){rect=box.getBoundingClientRect();var x=(e.clientX-rect.left)/rect.width-.5,y=(e.clientY-rect.top)/rect.height-.5;tx=x*opts.max;ty=-y*opts.max;kick();return [x,y,rect]},
+      reset:function(){tx=0;ty=0;kick()}
+    };
+  }
+
+  if(fine&&!reduce){
+    /* profile parallax follows pointer across the whole hero visual */
+    var vis=$('#visual'),pt=tilt($('#tilt'),{max:14});
+    vis.addEventListener('mousemove',function(e){pt.move(e,vis)});
+    vis.addEventListener('mouseleave',pt.reset);
+
+    /* project cards: 3D tilt + cursor spotlight */
+    $$('.project-card').forEach(function(card){
+      var t=tilt(card,{max:10,lift:6});
+      card.addEventListener('mousemove',function(e){
+        var r=t.move(e,card);
+        card.style.setProperty('--mx',(r[0]+.5)*100+'%');card.style.setProperty('--my',(r[1]+.5)*100+'%');
+      });
+      card.addEventListener('mouseleave',t.reset);
+    });
+
+    /* magnetic buttons */
+    $$('.magnetic').forEach(function(b){
+      var x=0,y=0,cx=0,cy=0,run=false;
+      function f(){cx+=(x-cx)*.15;cy+=(y-cy)*.15;b.style.transform='translate3d('+cx.toFixed(2)+'px,'+cy.toFixed(2)+'px,0)';if(Math.abs(x-cx)>.05||Math.abs(y-cy)>.05)requestAnimationFrame(f);else run=false}
+      function k(){if(!run){run=true;requestAnimationFrame(f)}}
+      b.addEventListener('mousemove',function(e){var r=b.getBoundingClientRect();x=(e.clientX-r.left-r.width/2)*.25;y=(e.clientY-r.top-r.height/2)*.35;k()});
+      b.addEventListener('mouseleave',function(){x=0;y=0;k()});
+    });
+  }
+
+  /* gallery viewer */
+  var viewer=$('#imageViewer'),vimg=$('#viewerImage');
+  function openViewer(src){vimg.src=src;viewer.classList.add('show')}
+  function closeViewer(){viewer.classList.remove('show')}
+  $$('.gallery-item img').forEach(function(img){img.addEventListener('click',function(){openViewer(img.src)})});
+  viewer.addEventListener('click',function(e){if(e.target===viewer)closeViewer()});
+  $('#viewerClose').addEventListener('click',closeViewer);
+  addEventListener('keydown',function(e){if(e.key==='Escape')closeViewer()});
+
+  /* clock: update only when the second changes */
+  var tEl=$('#liveTime'),dEl=$('#liveDate'),last='';
+  function clock(){
+    var n=new Date(),t=n.toLocaleTimeString('en-GB',{hour12:false,timeZone:'Africa/Lagos'});
+    if(t!==last){last=t;tEl.textContent=t;dEl.textContent=n.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'Africa/Lagos'})}
+    setTimeout(clock,1000-(Date.now()%1000));
+  }
+  clock();
+})();
+</script>
+<script>
+(function(){
+  var el=document.getElementById('typed');if(!el)return;
+  var w=['Website Builder','Bot builder','Brand Builder','Big Dreamer'],i=0,c=0,del=false;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=w[0];return}
+  function tick(){
+    var s=w[i],d=del?35:75;c+=del?-1:1;el.textContent=s.slice(0,c);
+    if(!del&&c===s.length){del=true;d=1400}
+    else if(del&&c===0){del=false;i=(i+1)%w.length;d=350}
+    setTimeout(tick,d);
+  }
+  tick();
+})();
+</script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getFirestore,doc,getDoc,collection,getDocs,query,orderBy} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+const fs=getFirestore(initializeApp({apiKey:"AIzaSyCOUKAzxKQm5uwil8kJbmRrY7gnj3bFfgE",authDomain:"diors-web.firebaseapp.com",projectId:"diors-web",storageBucket:"diors-web.firebasestorage.app",messagingSenderId:"731937530892",appId:"1:731937530892:web:e121b7c11c6ce58861ba29"}));const ref=doc(fs,'site','content');
+const $=s=>document.querySelector(s);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const show=e=>{e.classList.add('reveal','visible','done');return e};
+try{
+  const snap=await getDoc(ref);
+  if(snap.exists()){
+    const d=snap.data(),p=d.profile||{},st=d.settings||{};
+    if(p.bio)$('.hero-description').textContent=p.bio;
+    if(p.image){const im=$('#profileFrame img');$('#profileFrame').classList.remove('no-img');im.src=p.image}
+    if((d.projects||[]).length)$('.project-grid').replaceChildren(...d.projects.map(x=>{
+      const c=show(el('div','project-card'));c.append(el('div','project-icon','◈'),el('h3',null,x.name),el('p',null,x.description));return c}));
+    let gl=[];try{gl=(await getDocs(query(collection(fs,'gallery'),orderBy('createdAt','desc')))).docs.map(x=>x.data().src)}catch(e){console.warn(e)}
+    if(gl.length)$('.gallery-grid').replaceChildren(...gl.map(u=>{
+      const w=show(el('div','gallery-item')),i=el('img');i.src=u;i.alt='Gallery image';i.loading='lazy';w.append(i);return w}));
+    if((d.announcements||[]).length){
+      const sec=$('#announcements');sec.querySelectorAll('.announcement').forEach(x=>x.remove());
+      d.announcements.slice(0,3).forEach(a=>{
+        const b=show(el('div','announcement'));b.style.marginTop='16px';
+        b.append(el('div','announcement-tag','✦ UPDATE'),el('h3',null,a.title),el('p',null,a.message));sec.appendChild(b)});
+    }
+    const links=document.querySelectorAll('.contact-links a');
+    if(st.telegramLink)links[0].href=st.telegramLink;
+    if(st.whatsappLink)links[1].href=st.whatsappLink;
+    if(st.contactEmail){const m=el('a','secondary-btn','Email ↗');m.href='mailto:'+st.contactEmail;$('.contact-links').appendChild(m)}
+  }
+}catch(e){console.warn('Content load failed:',e)}
+document.addEventListener('click',e=>{
+  const i=e.target.closest('.gallery-item img');
+  if(i){$('#viewerImage').src=i.src;$('#imageViewer').classList.add('show')}
+});
+</script>
+</body>
+</html>
