@@ -253,9 +253,9 @@ textarea{resize:vertical;min-height:100px}
     <div class="content-box">
       <h3>Social links</h3>
       <label for="telegramLink">Telegram link</label>
-      <input id="telegramLink" type="url" placeholder="https://t.me/yourusername">
+      <input id="telegramLink" type="text" placeholder="@yourusername">
       <label for="whatsappLink">WhatsApp link</label>
-      <input id="whatsappLink" type="url" placeholder="https://wa.me/234…">
+      <input id="whatsappLink" type="text" placeholder="Your number, e.g. 0901 234 5678">
       <label for="contactEmail">Contact email</label>
       <input id="contactEmail" type="email" placeholder="you@example.com">
       <button class="btn" id="saveSettings">Save settings</button>
@@ -277,7 +277,7 @@ const fs=getFirestore(app),auth=getAuth(app);
   var db={projects:[],gallery:[],announcements:[],profile:{},settings:{}};
   var ref=doc(fs,'site','content');
   var profilePic='';
-  function save(){var o=Object.assign({},db);delete o.gallery;return setDoc(ref,o).catch(function(e){toast('Save failed: '+(e.code||e.message),1)})}
+  function save(){var o=Object.assign({},db);delete o.gallery;return setDoc(ref,o).then(function(){return true},function(e){toast('Save failed: '+(e.code||e.message),1);return false})}
 
   /* toast */
   function toast(msg,err){
@@ -407,15 +407,27 @@ const fs=getFirestore(app),auth=getAuth(app);
   };
 
   /* settings */
+  function tgLink(v){
+    v=v.trim();if(!v)return '';
+    if(/^https?:\/\//i.test(v))return safeUrl(v);
+    v=v.replace(/^@/,'').replace(/^t\.me\//i,'');
+    return /^[A-Za-z0-9_]{5,32}$/.test(v)?'https://t.me/'+v:null;
+  }
+  function waLink(v){
+    v=v.trim();if(!v)return '';
+    if(/^https?:\/\//i.test(v))return safeUrl(v);
+    var plus=v[0]==='+',d=v.replace(/\D/g,'');
+    if(d.length<8)return null;
+    if(!plus&&d[0]==='0')d='234'+d.slice(1);
+    return 'https://wa.me/'+d;
+  }
   $('#saveSettings').onclick=function(){
-    var f=[['telegramLink',1],['whatsappLink',1],['contactEmail',0]],out={};
-    for(var i=0;i<f.length;i++){
-      var el=$('#'+f[i][0]),v=el.value.trim();
-      if(v&&f[i][1]&&!safeUrl(v)){invalid(el);return toast('Check the link format.',1)}
-      if(v&&!f[i][1]&&!/^\S+@\S+\.\S+$/.test(v)){invalid(el);return toast('Check the email address.',1)}
-      out[f[i][0]]=v;
-    }
-    db.settings=out;save();toast('Settings saved.');
+    var t=$('#telegramLink'),w=$('#whatsappLink'),m=$('#contactEmail'),tv=tgLink(t.value),wv=waLink(w.value),mv=m.value.trim();
+    if(tv===null){invalid(t);return toast('Telegram: type @username or a t.me link.',1)}
+    if(wv===null){invalid(w);return toast('WhatsApp: type your number or a wa.me link.',1)}
+    if(mv&&!/^\S+@\S+\.\S+$/.test(mv)){invalid(m);return toast('Check the email address.',1)}
+    t.value=tv;w.value=wv;db.settings={telegramLink:tv,whatsappLink:wv,contactEmail:mv};
+    save().then(function(ok){if(ok)toast('Saved. Refresh your site to see it.')});
   };
 
   /* fill forms, then login / load */

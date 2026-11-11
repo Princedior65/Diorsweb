@@ -191,6 +191,7 @@ footer strong{color:var(--light)}
   *,*::before,*::after{animation:none!important;transition-duration:.01ms!important}
   .reveal{opacity:1;transform:none}
 }
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -314,8 +315,9 @@ footer strong{color:var(--light)}
     <h2>Have An Idea?</h2>
     <p>Interested in connecting, collaborating or discussing something creative? Feel free to reach out.</p>
     <div class="contact-links">
-      <a href="https://t.me/nightfallx01?text=Hello%20Prince%2C%20I%27m%20interested%20in%20having%20a%20professional%20website%20built.%20I%27d%20like%20to%20discuss%20the%20details%20and%20get%20a%20quote.%20Thank%20you." class="primary-btn magnetic" target="_blank" rel="noopener">Telegram ↗</a>
-      <a href="https://wa.me/2349019029740?text=Hello%20Prince%2C%20I%27m%20interested%20in%20having%20a%20professional%20website%20built.%20I%27d%20like%20to%20discuss%20the%20details%20and%20get%20a%20quote.%20Thank%20you." class="secondary-btn magnetic" target="_blank" rel="noopener">WhatsApp ↗</a>
+      <a href="#" id="ctTg" class="primary-btn magnetic" target="_blank" rel="noopener" hidden>Telegram ↗</a>
+      <a href="#" id="ctWa" class="secondary-btn magnetic" target="_blank" rel="noopener" hidden>WhatsApp ↗</a>
+      <a href="#" id="ctMail" class="secondary-btn magnetic" hidden>Email ↗</a>
     </div>
   </div>
 </section>
@@ -469,7 +471,7 @@ footer strong{color:var(--light)}
 <script>
 (function(){
   var el=document.getElementById('typed');if(!el)return;
-  var w=['Website Builder','Bot builder','Brand Builder','Big Dreamer'],i=0,c=0,del=false;
+  var w=['Website Builder','Digital Creator','Brand Builder','Big Dreamer'],i=0,c=0,del=false;
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){el.textContent=w[0];return}
   function tick(){
     var s=w[i],d=del?35:75;c+=del?-1:1;el.textContent=s.slice(0,c);
@@ -491,6 +493,8 @@ try{
   const snap=await getDoc(ref);
   if(snap.exists()){
     const d=snap.data(),p=d.profile||{},st=d.settings||{};
+    [['ctTg',st.telegramLink],['ctWa',st.whatsappLink]].forEach(([id,u])=>{const a=document.getElementById(id);if(u){a.href=u;a.hidden=false}});
+    if(st.contactEmail){const a=document.getElementById('ctMail');a.href='mailto:'+st.contactEmail;a.hidden=false}
     if(p.bio)$('.hero-description').textContent=p.bio;
     if(p.image){const im=$('#profileFrame img');$('#profileFrame').classList.remove('no-img');im.src=p.image}
     if((d.projects||[]).length)$('.project-grid').replaceChildren(...d.projects.map(x=>{
@@ -504,10 +508,6 @@ try{
         const b=show(el('div','announcement'));b.style.marginTop='16px';
         b.append(el('div','announcement-tag','✦ UPDATE'),el('h3',null,a.title),el('p',null,a.message));sec.appendChild(b)});
     }
-    const links=document.querySelectorAll('.contact-links a');
-    if(st.telegramLink)links[0].href=st.telegramLink;
-    if(st.whatsappLink)links[1].href=st.whatsappLink;
-    if(st.contactEmail){const m=el('a','secondary-btn','Email ↗');m.href='mailto:'+st.contactEmail;$('.contact-links').appendChild(m)}
   }
 }catch(e){console.warn('Content load failed:',e)}
 document.addEventListener('click',e=>{
